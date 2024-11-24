@@ -11,7 +11,8 @@ You can experience the live demo here.
 - **Vorticity Confinement**: This technique helps preserve small-scale fluid structures and counteracts numerical dissipation, enhancing the visual appeal of the simulation.
 - **External Forces**: The algorithm allows for adding external forces, simulating user interaction, or other inputs that affect the fluid's behavior. 
 
-The algorithm balances physical accuracy and computational efficiency, making it suitable for real-time applications like games and interactive simulations. It can produce visually convincing fluid-like effects, such as swirling smoke or flowing water, without requiring extremely fine grids or tiny time steps.
+## 🎮🌦️ Use cases:-
+The algorithm balances physical accuracy and computational efficiency, making it suitable for real-time applications like games and interactive simulations in weather/medical applications. It can produce visually convincing fluid-like effects, such as swirling smoke or flowing water, without requiring extremely fine grids or tiny time steps.
 
 ## 👩‍💻👨‍💻 Group Members:-
 - Parth Rohilla
