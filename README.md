@@ -1,4 +1,4 @@
-# CSCI 596 Project - Real-time fluid simulation 
+# CSCI 596 Project: Real-time fluid simulation 
 The project implements a real-time fluid dynamics algorithm based on the Navier-Stokes equations, which describe the motion of fluid substances. This algorithm is also known as the "stable fluids" method. We have used WebGL for this project. 
 
 ## Key Components of the Algorithm:-
