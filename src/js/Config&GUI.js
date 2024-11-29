@@ -1,6 +1,27 @@
+// Function to resize the canvas based on the current client dimensions
+function resizeCanvas () {
+    console.log("e"); // Log an event to the console (for debugging purposes).
+
+    // Calculate scaled dimensions for the canvas using the device's pixel ratio.
+    let scaledWidth = scaleByPixelRatio(canvas.clientWidth);
+    let scaledHeight = scaleByPixelRatio(canvas.clientHeight);
+
+    // Check if the current canvas dimensions differ from the scaled dimensions.
+    if (canvas.width != scaledWidth || canvas.height != scaledHeight) {
+        // Update the canvas width and height if they are different.
+        canvas.width = scaledWidth;
+        canvas.height = scaledHeight;
+        return true; // Indicate that the canvas was resized.
+    }
+
+    return false; // Indicate that no resizing was necessary.
+}
 
 
-
+// Select the first canvas element on the page.
+const canvas = document.getElementsByTagName('canvas')[0];
+// Resize the canvas to match its container's dimensions and adjust for pixel ratio.
+resizeCanvas();
 
 // Configuration object for simulation settings and parameters.
 let config = {
@@ -30,3 +51,14 @@ let config = {
     SUNRAYS_RESOLUTION: 196,       // Resolution of the sunrays effect.
     SUNRAYS_WEIGHT: 1.0,           // Weight of the sunrays effect.
 };
+
+// Array to store active pointers (e.g., mouse or touch interactions).
+let pointers = [];
+// Stack to manage queued splats (fluid disturbances).
+let splatStack = [];
+// Add the default pointer to the pointers array.
+pointers.push(new pointerPrototype());
+
+// Get WebGL context and extensions for the canvas.
+const { gl, ext } = getWebGLContext(canvas);
+
