@@ -181,3 +181,79 @@ function drawDisplay(target) {
     blit(target);
 }
 
+// Function `applyBloom` is applying a bloom effect to the source texture and rendering the result to the destination texture.
+// Bloom is a post-processing effect used to simulate light scattering, making bright areas appear to glow.
+function applyBloom(source, destination) {
+    // Checking if there are enough bloom framebuffers for the operation
+    if (bloomFramebuffers.length < 2)
+        return;
+
+    let last = destination;
+
+    // Disabling blending mode for the initial bloom prefilter pass
+    gl.disable(gl.BLEND);
+
+    // Binding the bloom prefilter program for thresholding and knee calculation
+    bloomPrefilterProgram.bind();
+    // Calculating knee parameters for smooth bloom thresholding
+    let knee = config.BLOOM_THRESHOLD * config.BLOOM_SOFT_KNEE + 0.0001;
+    let curve0 = config.BLOOM_THRESHOLD - knee;
+    let curve1 = knee * 2;
+    let curve2 = 0.25 / knee;
+    // Passing curve parameters and threshold value to the shader
+    gl.uniform3f(bloomPrefilterProgram.uniforms.curve, curve0, curve1, curve2);
+    gl.uniform1f(bloomPrefilterProgram.uniforms.threshold, config.BLOOM_THRESHOLD);
+    // Attaching the source texture and setting it for processing
+    gl.uniform1i(bloomPrefilterProgram.uniforms.uTexture, source.attach(0));
+    // Performing a prefilter blit operation on the destination framebuffer
+    blit(last);
+
+    // Binding the bloom blur program for downsampling and blurring
+    bloomBlurProgram.bind();
+    // Iterating over each bloom framebuffer to progressively blur the texture
+    for (let i = 0; i < bloomFramebuffers.length; i++) {
+        let dest = bloomFramebuffers[i];
+        // Setting the texel size for accurate sampling in the blur shader
+        gl.uniform2f(bloomBlurProgram.uniforms.texelSize, last.texelSizeX, last.texelSizeY);
+        // Attaching the previous texture as input to the current blur pass
+        gl.uniform1i(bloomBlurProgram.uniforms.uTexture, last.attach(0));
+        // Performing a blit operation to render the blurred texture into the current framebuffer
+        blit(dest);
+        // Updating `last` to point to the current framebuffer for the next pass
+        last = dest;
+    }
+
+    // Enabling additive blending to combine blurred layers
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.enable(gl.BLEND);
+
+    // Iterating over the framebuffers in reverse order to upsample and merge them
+    for (let i = bloomFramebuffers.length - 2; i >= 0; i--) {
+        let baseTex = bloomFramebuffers[i];
+        // Setting the texel size for accurate sampling during upsampling
+        gl.uniform2f(bloomBlurProgram.uniforms.texelSize, last.texelSizeX, last.texelSizeY);
+        // Attaching the current blurred texture as input for blending
+        gl.uniform1i(bloomBlurProgram.uniforms.uTexture, last.attach(0));
+        // Adjusting viewport to the size of the base texture
+        gl.viewport(0, 0, baseTex.width, baseTex.height);
+        // Performing a blit operation to merge the textures
+        blit(baseTex);
+        // Updating `last` to point to the base texture
+        last = baseTex;
+    }
+
+    // Disabling blending mode before the final bloom pass
+    gl.disable(gl.BLEND);
+
+    // Binding the bloom final program for the final compositing step
+    bloomFinalProgram.bind();
+    // Setting the texel size for the final shader pass
+    gl.uniform2f(bloomFinalProgram.uniforms.texelSize, last.texelSizeX, last.texelSizeY);
+    // Attaching the last processed texture as input for the final pass
+    gl.uniform1i(bloomFinalProgram.uniforms.uTexture, last.attach(0));
+    // Setting the bloom intensity for the final compositing
+    gl.uniform1f(bloomFinalProgram.uniforms.intensity, config.BLOOM_INTENSITY);
+    // Performing a blit operation to render the final bloom effect onto the destination framebuffer
+    blit(destination);
+}
+
