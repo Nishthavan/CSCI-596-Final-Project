@@ -84,3 +84,38 @@ if (!ext.supportLinearFiltering) {
     config.BLOOM = false;
     config.SUNRAYS = false;
 }
+
+
+function textureToCanvas(textureData, width, height) {
+    // Create a new canvas element.
+    let canvasElement = document.createElement('canvas');
+    let canvasContext = canvasElement.getContext('2d');
+
+    // Set the canvas dimensions.
+    canvasElement.width = width;
+    canvasElement.height = height;
+
+    // Create image data and set it with the normalized texture data.
+    let imageData = canvasContext.createImageData(width, height);
+    imageData.data.set(textureData);
+
+    // Render the image data to the canvas.
+    canvasContext.putImageData(imageData, 0, 0);
+
+    return canvasElement;
+}
+
+
+function downloadURI(filename, uri) {
+    // Create a temporary link element.
+    let downloadLink = document.createElement('a');
+    downloadLink.download = filename;
+    downloadLink.href = uri;
+
+    // Trigger the download.
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    // Remove the link element after download.
+    document.body.removeChild(downloadLink);
+}
