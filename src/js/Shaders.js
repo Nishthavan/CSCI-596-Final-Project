@@ -40,7 +40,23 @@ class ShaderProgram {
     }
 }
 
-// Some Util Funcs...
+// Function to Create Shaders
+function createShader(shaderType, sourceCode, keywordArray) {
+    const updatedSource = appendKeywords(sourceCode, keywordArray);
+
+    const shaderObj = gl.createShader(shaderType);
+    gl.shaderSource(shaderObj, updatedSource);
+    gl.compileShader(shaderObj);
+
+    if (!gl.getShaderParameter(shaderObj, gl.COMPILE_STATUS)) {
+        console.trace(gl.getShaderInfoLog(shaderObj));
+    }
+
+    return shaderObj;
+}
+
+
+// Util Functions
 function generateProgram(vertexSrc, fragSrc) {
     const shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexSrc);
@@ -59,4 +75,9 @@ function extractUniforms(programID) {
         uniformDetails[uniformInfo] = gl.getUniformLocation(programID, uniformInfo);
     }
     return uniformDetails;
+}
+function appendKeywords(sourceText, keywordArray) {
+    if (!keywordArray) return sourceText;
+    const keywordDefs = keywordArray.map(keyword => `#define ${keyword}\n`).join('');
+    return keywordDefs + sourceText;
 }
