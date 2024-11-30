@@ -52,6 +52,22 @@ let config = {
     SUNRAYS_WEIGHT: 1.0,           // Weight of the sunrays effect.
 };
 
+
+// Constructor for pointerPrototype, which represents user interactions (e.g., mouse or touch input).
+function pointerPrototype () {
+    this.id = -1;                   // Unique ID for the pointer (e.g., touch ID).
+    this.texcoordX = 0;             // Current texture coordinate X.
+    this.texcoordY = 0;             // Current texture coordinate Y.
+    this.prevTexcoordX = 0;         // Previous texture coordinate X.
+    this.prevTexcoordY = 0;         // Previous texture coordinate Y.
+    this.deltaX = 0;                // Change in X direction.
+    this.deltaY = 0;                // Change in Y direction.
+    this.down = false;              // Whether the pointer is currently pressed down.
+    this.moved = false;             // Whether the pointer has moved.
+    this.color = [30, 0, 300];      // Color of the pointer's splat (fluid interaction).
+}
+
+
 // Array to store active pointers (e.g., mouse or touch interactions).
 let pointers = [];
 // Stack to manage queued splats (fluid disturbances).
@@ -62,3 +78,9 @@ pointers.push(new pointerPrototype());
 // Get WebGL context and extensions for the canvas.
 const { gl, ext } = getWebGLContext(canvas);
 
+if (!ext.supportLinearFiltering) {
+    config.DYE_RESOLUTION = 512;
+    config.SHADING = false;
+    config.BLOOM = false;
+    config.SUNRAYS = false;
+}
