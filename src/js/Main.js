@@ -257,3 +257,137 @@ function applyBloom(source, destination) {
     blit(destination);
 }
 
+/**
+ * The `applySunrays` function is applying the sunray effect to the source texture.
+ * It creates a mask and uses it to render the final sunray effect onto the destination texture.
+ * 
+ * @param {WebGLTexture} source - The source texture for generating sunrays.
+ * @param {WebGLFramebuffer} mask - The intermediate mask texture.
+ * @param {WebGLFramebuffer} destination - The destination texture where sunrays are rendered.
+ */
+function applySunrays(source, mask, destination) {
+    // Disabling blending to render sunrays
+    gl.disable(gl.BLEND);
+
+    // Binding the sunrays mask program and attaching the source texture
+    sunraysMaskProgram.bind();
+    gl.uniform1i(sunraysMaskProgram.uniforms.uTexture, source.attach(0)); // Setting the source texture
+    blit(mask); // Rendering the mask
+
+    // Binding the sunrays program and attaching the mask
+    sunraysProgram.bind();
+    gl.uniform1f(sunraysProgram.uniforms.weight, config.SUNRAYS_WEIGHT); // Setting the sunray weight
+    gl.uniform1i(sunraysProgram.uniforms.uTexture, mask.attach(0)); // Attaching the mask texture
+    blit(destination); // Rendering the sunrays effect to the destination
+}
+
+/**
+ * The `blur` function is applying a blur effect to a target texture over a specified number of iterations.
+ * It alternates between horizontal and vertical passes for each iteration.
+ * 
+ * @param {WebGLFramebuffer} target - The texture to apply the blur effect on.
+ * @param {WebGLFramebuffer} temp - The temporary texture used during the blur passes.
+ * @param {number} iterations - The number of blur iterations to perform.
+ */
+function blur(target, temp, iterations) {
+    // Binding the blur program
+    blurProgram.bind();
+
+    // Iterating to apply horizontal and vertical blur passes
+    for (let i = 0; i < iterations; i++) {
+        // Setting horizontal blur pass
+        gl.uniform2f(blurProgram.uniforms.texelSize, target.texelSizeX, 0.0);
+        gl.uniform1i(blurProgram.uniforms.uTexture, target.attach(0)); // Attaching the target texture
+        blit(temp); // Rendering to the temporary texture
+
+        // Setting vertical blur pass
+        gl.uniform2f(blurProgram.uniforms.texelSize, 0.0, target.texelSizeY);
+        gl.uniform1i(blurProgram.uniforms.uTexture, temp.attach(0)); // Attaching the temporary texture
+        blit(target); // Rendering back to the target texture
+    }
+}
+
+/**
+ * The `splatPointer` function is creating a splat effect at the pointer's location.
+ * It calculates the force based on the pointer's movement and applies the splat effect with the given color.
+ * 
+ * @param {Object} pointer - The pointer object containing position, movement, and color data.
+ */
+function splatPointer(pointer) {
+    // Calculating the force based on pointer movement and configuration
+    let dx = pointer.deltaX * config.SPLAT_FORCE;
+    let dy = pointer.deltaY * config.SPLAT_FORCE;
+
+    // Calling the splat function to create the splat effect
+    splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+}
+
+/**
+ * The `multipleSplats` function is generating multiple random splats across the canvas.
+ * It creates random positions, directions, and colors for the splats.
+ * 
+ * @param {number} amount - The number of splats to create.
+ */
+function multipleSplats(amount) {
+    // Iterating to create the specified number of splats
+    for (let i = 0; i < amount; i++) {
+        const color = generateColor(); // Generating a random color
+        color.r *= 10.0; // Increasing red intensity
+        color.g *= 10.0; // Increasing green intensity
+        color.b *= 10.0; // Increasing blue intensity
+
+        const x = Math.random(); // Generating random x position
+        const y = Math.random(); // Generating random y position
+        const dx = 1000 * (Math.random() - 0.5); // Generating random x force
+        const dy = 1000 * (Math.random() - 0.5); // Generating random y force
+
+        splat(x, y, dx, dy, color); // Creating the splat
+    }
+}
+
+/**
+ * The `splat` function is creating a single splat effect at the specified position.
+ * It applies the splat to both velocity and dye textures with the provided direction and color.
+ * 
+ * @param {number} x - The x-coordinate of the splat.
+ * @param {number} y - The y-coordinate of the splat.
+ * @param {number} dx - The x-direction force of the splat.
+ * @param {number} dy - The y-direction force of the splat.
+ * @param {Object} color - The color of the splat, with `r`, `g`, `b` components.
+ */
+function splat(x, y, dx, dy, color) {
+    // Applying the splat to the velocity texture
+    splatProgram.bind();
+    gl.uniform1i(splatProgram.uniforms.uTarget, velocity.read.attach(0)); // Attaching the velocity texture
+    gl.uniform1f(splatProgram.uniforms.aspectRatio, canvas.width / canvas.height); // Setting aspect ratio
+    gl.uniform2f(splatProgram.uniforms.point, x, y); // Setting the splat position
+    gl.uniform3f(splatProgram.uniforms.color, dx, dy, 0.0); // Setting the force vector
+    gl.uniform1f(splatProgram.uniforms.radius, correctRadius(config.SPLAT_RADIUS / 100.0)); // Calculating and setting radius
+    blit(velocity.write); // Rendering to the velocity texture
+    velocity.swap();
+
+    // Applying the splat to the dye texture
+    gl.uniform1i(splatProgram.uniforms.uTarget, dye.read.attach(0)); // Attaching the dye texture
+    gl.uniform3f(splatProgram.uniforms.color, color.r, color.g, color.b); // Setting the color
+    blit(dye.write); // Rendering to the dye texture
+    dye.swap();
+}
+
+/**
+ * The `correctRadius` function is adjusting the radius of a splat effect based on the canvas aspect ratio.
+ * It ensures that the radius remains visually proportional on non-square canvases.
+ * 
+ * @param {number} radius - The initial radius of the splat.
+ * @returns {number} - The adjusted radius.
+ */
+function correctRadius(radius) {
+    // Calculating the aspect ratio of the canvas
+    let aspectRatio = canvas.width / canvas.height;
+
+    // Adjusting the radius for wide or tall canvases
+    if (aspectRatio > 1)
+        radius *= aspectRatio;
+
+    return radius; // Returning the corrected radius
+}
+
