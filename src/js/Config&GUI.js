@@ -86,6 +86,35 @@ if (!ext.supportLinearFiltering) {
 }
 
 
+
+function normalizeTexture(textureData, width, height) {
+    // Create an array for the normalized result.
+    let normalizedData = new Uint8Array(textureData.length);
+    let sourceIndex = 0;
+
+    // Iterate over the height and width to normalize pixel values.
+    for (let y = height - 1; y >= 0; y--) {
+        for (let x = 0; x < width; x++) {
+            let destinationIndex = y * width * 4 + x * 4;
+
+            // Clamp and scale pixel values to 0–255 range.
+            normalizedData[destinationIndex + 0] = clamp01(textureData[sourceIndex + 0]) * 255;
+            normalizedData[destinationIndex + 1] = clamp01(textureData[sourceIndex + 1]) * 255;
+            normalizedData[destinationIndex + 2] = clamp01(textureData[sourceIndex + 2]) * 255;
+            normalizedData[destinationIndex + 3] = clamp01(textureData[sourceIndex + 3]) * 255;
+
+            sourceIndex += 4;
+        }
+    }
+    return normalizedData;
+}
+
+function clamp01(inputValue) {
+    // Clamp the input value between 0 and 1.
+    return Math.min(Math.max(inputValue, 0), 1);
+}
+
+
 function textureToCanvas(textureData, width, height) {
     // Create a new canvas element.
     let canvasElement = document.createElement('canvas');
