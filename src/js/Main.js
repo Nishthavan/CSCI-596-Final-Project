@@ -391,3 +391,188 @@ function correctRadius(radius) {
     return radius; // Returning the corrected radius
 }
 
+/**
+ * The `mousedown` event listener is tracking mouse down events on the canvas.
+ * It is updating the pointer state for interaction initialization.
+ */
+canvas.addEventListener('mousedown', e => {
+    // Calculating the scaled position of the mouse click
+    let posX = scaleByPixelRatio(e.offsetX);
+    let posY = scaleByPixelRatio(e.offsetY);
+
+    // Finding the primary pointer or creating a new one
+    let pointer = pointers.find(p => p.id == -1);
+    if (pointer == null)
+        pointer = new pointerPrototype();
+
+    // Updating pointer data to reflect the mouse down event
+    updatePointerDownData(pointer, -1, posX, posY);
+});
+
+/**
+ * The `mousemove` event listener is tracking mouse movement while the pointer is down.
+ * It is updating the pointer's movement data in real time.
+ */
+canvas.addEventListener('mousemove', e => {
+    // Retrieving the primary pointer
+    let pointer = pointers[0];
+    if (!pointer.down) return; // Skipping if the pointer is not down
+
+    // Calculating the scaled position of the mouse movement
+    let posX = scaleByPixelRatio(e.offsetX);
+    let posY = scaleByPixelRatio(e.offsetY);
+
+    // Updating the pointer's movement data
+    updatePointerMoveData(pointer, posX, posY);
+});
+
+/**
+ * The `mouseup` event listener is resetting the pointer state when the mouse button is released.
+ */
+window.addEventListener('mouseup', () => {
+    // Updating the pointer data to reflect the mouse up event
+    updatePointerUpData(pointers[0]);
+});
+
+/**
+ * The `touchstart` event listener is handling touch start interactions on the canvas.
+ * It is updating pointers for each active touch.
+ */
+canvas.addEventListener('touchstart', e => {
+    e.preventDefault(); // Preventing default touch behavior
+    console.log('touchstart');
+
+    // Retrieving all active touches
+    const touches = e.targetTouches;
+
+    // Creating new pointers if needed to match the number of touches
+    while (touches.length >= pointers.length)
+        pointers.push(new pointerPrototype());
+
+    // Updating each pointer to reflect the touch start event
+    for (let i = 0; i < touches.length; i++) {
+        let posX = scaleByPixelRatio(touches[i].pageX);
+        let posY = scaleByPixelRatio(touches[i].pageY);
+        updatePointerDownData(pointers[i + 1], touches[i].identifier, posX, posY);
+    }
+});
+
+/**
+ * The `touchmove` event listener is tracking touch movement on the canvas.
+ * It is updating pointer movement data for all active touches.
+ */
+canvas.addEventListener('touchmove', e => {
+    e.preventDefault(); // Preventing default touch behavior
+    console.log('touchmove');
+
+    // Retrieving all active touches
+    const touches = e.targetTouches;
+
+    // Updating movement data for each active touch
+    for (let i = 0; i < touches.length; i++) {
+        let pointer = pointers[i + 1];
+        if (!pointer.down) continue; // Skipping if the pointer is not down
+
+        let posX = scaleByPixelRatio(touches[i].pageX);
+        let posY = scaleByPixelRatio(touches[i].pageY);
+        updatePointerMoveData(pointer, posX, posY);
+    }
+}, false);
+
+/**
+ * The `touchend` event listener is handling the end of touch interactions.
+ * It is updating pointer states for all ended touches.
+ */
+window.addEventListener('touchend', e => {
+    const touches = e.changedTouches;
+    console.log('touchend');
+
+    // Updating each pointer to reflect the touch end event
+    for (let i = 0; i < touches.length; i++) {
+        let pointer = pointers.find(p => p.id == touches[i].identifier);
+        if (pointer == null) continue; // Skipping if the pointer is not found
+        updatePointerUpData(pointer);
+    }
+});
+
+/**
+ * The `keydown` event listener is monitoring keypresses.
+ * It is toggling the pause state or triggering random splats based on key input.
+ */
+window.addEventListener('keydown', e => {
+    if (e.code === 'KeyP')
+        config.PAUSED = !config.PAUSED; // Toggling the pause state
+    if (e.key === ' ')
+        splatStack.push(parseInt(Math.random() * 20) + 5); // Adding random splats
+});
+
+/**
+ * The `updatePointerDownData` function is initializing pointer data when a pointer goes down.
+ * It is setting the position, color, and movement state.
+ */
+function updatePointerDownData(pointer, id, posX, posY) {
+    // Setting pointer ID and status
+    pointer.id = id;
+    pointer.down = true;
+    pointer.moved = false;
+
+    // Calculating and setting texture coordinates
+    pointer.texcoordX = posX / canvas.width;
+    pointer.texcoordY = 1.0 - posY / canvas.height;
+
+    // Storing previous coordinates
+    pointer.prevTexcoordX = pointer.texcoordX;
+    pointer.prevTexcoordY = pointer.texcoordY;
+
+    // Initializing movement deltas and assigning a random color
+    pointer.deltaX = 0;
+    pointer.deltaY = 0;
+    pointer.color = generateColor();
+}
+
+/**
+ * The `updatePointerMoveData` function is updating pointer data during movement.
+ * It is calculating deltas and marking the pointer as moved.
+ */
+function updatePointerMoveData(pointer, posX, posY) {
+    // Storing previous texture coordinates
+    pointer.prevTexcoordX = pointer.texcoordX;
+    pointer.prevTexcoordY = pointer.texcoordY;
+
+    // Calculating new texture coordinates
+    pointer.texcoordX = posX / canvas.width;
+    pointer.texcoordY = 1.0 - posY / canvas.height;
+
+    // Calculating deltas for movement
+    pointer.deltaX = correctDeltaX(pointer.texcoordX - pointer.prevTexcoordX);
+    pointer.deltaY = correctDeltaY(pointer.texcoordY - pointer.prevTexcoordY);
+
+    // Marking the pointer as moved if deltas are significant
+    pointer.moved = Math.abs(pointer.deltaX) > 0 || Math.abs(pointer.deltaY) > 0;
+}
+
+/**
+ * The `updatePointerUpData` function is resetting the pointer state when it goes up.
+ */
+function updatePointerUpData(pointer) {
+    pointer.down = false; // Setting the pointer status to up
+}
+
+/**
+ * The `correctDeltaX` function is adjusting the delta X value based on canvas aspect ratio.
+ */
+function correctDeltaX(delta) {
+    let aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio < 1) delta *= aspectRatio; // Adjusting for wide canvases
+    return delta;
+}
+
+/**
+ * The `correctDeltaY` function is adjusting the delta Y value based on canvas aspect ratio.
+ */
+function correctDeltaY(delta) {
+    let aspectRatio = canvas.width / canvas.height;
+    if (aspectRatio > 1) delta /= aspectRatio; // Adjusting for tall canvases
+    return delta;
+}
+
