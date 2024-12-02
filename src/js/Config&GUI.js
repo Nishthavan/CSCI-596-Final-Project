@@ -87,6 +87,49 @@ if (!ext.supportLinearFiltering) {
 
 
 
+
+function captureScreenshot() {
+    // Determine the resolution for the capture.
+    let captureResolution = getResolution(config.CAPTURE_RESOLUTION);
+
+    // Create a framebuffer object for the screenshot.
+    let captureTarget = createFBO(captureResolution.width, captureResolution.height, ext.formatRGBA.internalFormat, ext.formatRGBA.format, ext.halfFloatTexType, gl.NEAREST);
+
+    // Render the current simulation state into the framebuffer.
+    render(captureTarget);
+
+    // Convert the framebuffer to a texture.
+    let rawTexture = framebufferToTexture(captureTarget);
+
+    // Normalize the texture data.
+    let normalizedTexture = normalizeTexture(rawTexture, captureTarget.width, captureTarget.height);
+
+    // Convert the texture into a canvas element.
+    let screenshotCanvas = textureToCanvas(normalizedTexture, captureTarget.width, captureTarget.height);
+
+    // Create a data URI from the canvas.
+    let dataUri = screenshotCanvas.toDataURL();
+
+    // Download the screenshot as a file.
+    downloadURI('fluid.png', dataUri);
+
+    // Clean up the URI.
+    URL.revokeObjectURL(dataUri);
+}
+
+function framebufferToTexture(targetFramebuffer) {
+    // Bind the framebuffer.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, targetFramebuffer.fbo);
+
+    // Calculate the length of the texture data array.
+    let textureDataLength = targetFramebuffer.width * targetFramebuffer.height * 4;
+
+    // Read the pixels from the framebuffer into a Float32Array.
+    let pixelData = new Float32Array(textureDataLength);
+    gl.readPixels(0, 0, targetFramebuffer.width, targetFramebuffer.height, gl.RGBA, gl.FLOAT, pixelData);
+    return pixelData;
+}
+
 function normalizeTexture(textureData, width, height) {
     // Create an array for the normalized result.
     let normalizedData = new Uint8Array(textureData.length);
