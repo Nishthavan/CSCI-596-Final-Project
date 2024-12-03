@@ -88,6 +88,24 @@ if (!ext.supportLinearFiltering) {
 
 
 
+function startGUI() {
+    var gui = new dat.GUI({ width: 300 });
+
+    // Add sliders for simulation parameters.
+    gui.add(config, 'DENSITY_DISSIPATION', 0, 4.0).name('density diffusion');
+    gui.add(config, 'VELOCITY_DISSIPATION', 0, 4.0).name('velocity diffusion');
+    gui.add(config, 'PRESSURE', 0.0, 1.0).name('pressure');
+
+    // Add button for random splats.
+    gui.add({ fun: () => {
+        splatStack.push(parseInt(Math.random() * 20) + 5);
+    } }, 'fun').name('Random splats');
+
+    // Add button to capture a screenshot.
+    gui.add({ fun: captureScreenshot }, 'fun').name('Take screenshot');
+}
+
+
 function captureScreenshot() {
     // Determine the resolution for the capture.
     let captureResolution = getResolution(config.CAPTURE_RESOLUTION);
