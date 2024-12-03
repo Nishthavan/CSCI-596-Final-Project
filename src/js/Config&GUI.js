@@ -87,6 +87,48 @@ if (!ext.supportLinearFiltering) {
 
 
 
+function getSupportedFormat(glContext, internalFormat, format, type) {
+    // Check if the specified render texture format is supported.
+    if (!supportRenderTextureFormat(glContext, internalFormat, format, type)) {
+        // Fallback to other formats if the current format is unsupported.
+        switch (internalFormat) {
+            case glContext.R16F: // If R16F is unsupported, try RG16F.
+                return getSupportedFormat(glContext, glContext.RG16F, glContext.RG, type);
+            case glContext.RG16F: // If RG16F is unsupported, try RGBA16F.
+                return getSupportedFormat(glContext, glContext.RGBA16F, glContext.RGBA, type);
+            default:
+                return null; // Return null if no supported format is found.
+        }
+    }
+
+    // Return the supported format details if successful.
+    return {
+        internalFormat, // The internal format (e.g., RGBA16F).
+        format          // The corresponding external format (e.g., RGBA).
+    };
+}
+
+function supportRenderTextureFormat(glContext, internalFormat, format, type) {
+    // Create and bind a texture to test render compatibility.
+    let testTexture = glContext.createTexture();
+    glContext.bindTexture(glContext.TEXTURE_2D, testTexture);
+    glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_MIN_FILTER, glContext.NEAREST);
+    glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_MAG_FILTER, glContext.NEAREST);
+    glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_WRAP_S, glContext.CLAMP_TO_EDGE);
+    glContext.texParameteri(glContext.TEXTURE_2D, glContext.TEXTURE_WRAP_T, glContext.CLAMP_TO_EDGE);
+
+    // Define the texture with given format and type.
+    glContext.texImage2D(glContext.TEXTURE_2D, 0, internalFormat, 4, 4, 0, format, type, null);
+
+    // Create a framebuffer and attach the texture to it.
+    let testFramebuffer = glContext.createFramebuffer();
+    glContext.bindFramebuffer(glContext.FRAMEBUFFER, testFramebuffer);
+    glContext.framebufferTexture2D(glContext.FRAMEBUFFER, glContext.COLOR_ATTACHMENT0, glContext.TEXTURE_2D, testTexture, 0);
+
+    // Check the framebuffer status to verify if it's complete.
+    let framebufferStatus = glContext.checkFramebufferStatus(glContext.FRAMEBUFFER);
+    return framebufferStatus == glContext.FRAMEBUFFER_COMPLETE;
+}
 
 function startGUI() {
     var gui = new dat.GUI({ width: 300 });
