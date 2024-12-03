@@ -243,3 +243,32 @@ function createTextureAsync (url) {
 
     return obj;
 }
+
+
+function updateKeywords () {
+    let displayKeywords = [];
+    if (config.SHADING) displayKeywords.push("SHADING");
+    if (config.BLOOM) displayKeywords.push("BLOOM");
+    if (config.SUNRAYS) displayKeywords.push("SUNRAYS");
+    displayMaterial.setKeywords(displayKeywords);
+}
+
+updateKeywords();
+initFramebuffers();
+multipleSplats(parseInt(Math.random() * 20) + 5);
+
+let lastUpdateTime = Date.now();
+let colorUpdateTimer = 0.0;
+update();
+
+function update () {
+    const dt = calcDeltaTime();
+    if (resizeCanvas())
+        initFramebuffers();
+    updateColors(dt);
+    applyInputs();
+    if (!config.PAUSED)
+        step(dt);
+    render(null);
+    requestAnimationFrame(update);
+}
