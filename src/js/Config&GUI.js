@@ -52,7 +52,6 @@ let config = {
     SUNRAYS_WEIGHT: 1.0,           // Weight of the sunrays effect.
 };
 
-
 // Constructor for pointerPrototype, which represents user interactions (e.g., mouse or touch input).
 function pointerPrototype () {
     this.id = -1;                   // Unique ID for the pointer (e.g., touch ID).
@@ -67,7 +66,6 @@ function pointerPrototype () {
     this.color = [30, 0, 300];      // Color of the pointer's splat (fluid interaction).
 }
 
-
 // Array to store active pointers (e.g., mouse or touch interactions).
 let pointers = [];
 // Stack to manage queued splats (fluid disturbances).
@@ -78,16 +76,85 @@ pointers.push(new pointerPrototype());
 // Get WebGL context and extensions for the canvas.
 const { gl, ext } = getWebGLContext(canvas);
 
+
 if (!ext.supportLinearFiltering) {
     config.DYE_RESOLUTION = 512;
     config.SHADING = false;
     config.BLOOM = false;
     config.SUNRAYS = false;
 }
-// if (isMobile()) {
-//     config.DYE_RESOLUTION = 512;
-// }
 
+// startGUI();
+function getWebGLContext (canvas) {
+    // Parameters for creating the WebGL context.
+    const contextParams = { 
+        alpha: true,                  // Enable transparency.
+        depth: false,                 // Disable depth buffer.
+        stencil: false,               // Disable stencil buffer.
+        antialias: false,             // Disable anti-aliasing.
+        preserveDrawingBuffer: false  // Don't preserve the drawing buffer.
+    };
+
+    // Attempt to get a WebGL2 context.
+    let glContext = canvas.getContext('webgl2', contextParams);
+    const isWebGL2 = !!glContext; // Check if WebGL2 is supported.
+
+    // Fallback to WebGL1 or experimental WebGL if WebGL2 is not available.
+    if (!isWebGL2) {
+        glContext = canvas.getContext('webgl', contextParams) || canvas.getContext('experimental-webgl', contextParams);
+    }
+
+    // Variables to store WebGL extensions and features.
+    let halfFloatExtension;
+    let supportsLinearFiltering;
+
+    if (isWebGL2) {
+        // Enable color buffer float extension for WebGL2.
+        glContext.getExtension('EXT_color_buffer_float');
+        // Check if linear filtering is supported for floating-point textures.
+        supportsLinearFiltering = glContext.getExtension('OES_texture_float_linear');
+    } else {
+        // For WebGL1, get half-float extension and linear filtering support.
+        halfFloatExtension = glContext.getExtension('OES_texture_half_float');
+        supportsLinearFiltering = glContext.getExtension('OES_texture_half_float_linear');
+    }
+
+    // Set the background clear color to black.
+    glContext.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    // Determine the texture type for half-float textures based on the WebGL version.
+    const halfFloatTextureType = isWebGL2 ? glContext.HALF_FLOAT : halfFloatExtension.HALF_FLOAT_OES;
+
+    // Variables to store supported texture formats.
+    let rgbaFormat, rgFormat, rFormat;
+
+    if (isWebGL2) {
+        // WebGL2 texture formats.
+        rgbaFormat = getSupportedFormat(glContext, glContext.RGBA16F, glContext.RGBA, halfFloatTextureType);
+        rgFormat = getSupportedFormat(glContext, glContext.RG16F, glContext.RG, halfFloatTextureType);
+        rFormat = getSupportedFormat(glContext, glContext.R16F, glContext.RED, halfFloatTextureType);
+    } else {
+        // WebGL1 texture formats (fallback to RGBA if others are not available).
+        rgbaFormat = getSupportedFormat(glContext, glContext.RGBA, glContext.RGBA, halfFloatTextureType);
+        rgFormat = getSupportedFormat(glContext, glContext.RGBA, glContext.RGBA, halfFloatTextureType);
+        rFormat = getSupportedFormat(glContext, glContext.RGBA, glContext.RGBA, halfFloatTextureType);
+    }
+
+    // Log an event indicating the WebGL version and support for RGBA format.
+    ga('send', 'event', isWebGL2 ? 'webgl2' : 'webgl', rgbaFormat == null ? 'not supported' : 'supported');
+
+    // Return the WebGL context and supported extensions.
+    return {
+        gl: glContext, // WebGL context.
+        ext: {
+            formatRGBA: rgbaFormat,           // RGBA texture format.
+            formatRG: rgFormat,               // RG texture format.
+            formatR: rFormat,                 // R texture format.
+            halfFloatTexType: halfFloatTextureType, // Half-float texture type.
+            supportLinearFiltering: supportsLinearFiltering // Support for linear filtering.
+        }
+    };
+}
 
 function getSupportedFormat(glContext, internalFormat, format, type) {
     // Check if the specified render texture format is supported.
@@ -148,7 +215,6 @@ function startGUI() {
     // Add button to capture a screenshot.
     gui.add({ fun: captureScreenshot }, 'fun').name('Take screenshot');
 }
-
 
 function captureScreenshot() {
     // Determine the resolution for the capture.
@@ -219,7 +285,6 @@ function clamp01(inputValue) {
     return Math.min(Math.max(inputValue, 0), 1);
 }
 
-
 function textureToCanvas(textureData, width, height) {
     // Create a new canvas element.
     let canvasElement = document.createElement('canvas');
@@ -238,7 +303,6 @@ function textureToCanvas(textureData, width, height) {
 
     return canvasElement;
 }
-
 
 function downloadURI(filename, uri) {
     // Create a temporary link element.
