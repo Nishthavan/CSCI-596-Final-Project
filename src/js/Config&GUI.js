@@ -84,7 +84,9 @@ if (!ext.supportLinearFiltering) {
     config.BLOOM = false;
     config.SUNRAYS = false;
 }
-
+// if (isMobile()) {
+//     config.DYE_RESOLUTION = 512;
+// }
 
 
 function getSupportedFormat(glContext, internalFormat, format, type) {
