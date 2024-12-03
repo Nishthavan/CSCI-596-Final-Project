@@ -576,3 +576,148 @@ function correctDeltaY(delta) {
     return delta;
 }
 
+/**
+ * The `generateColor` function is creating and returning a randomly selected color.
+ * It is either generating a random HSV color or picking from predefined colors.
+ */
+function generateColor() {
+    // Generating a random HSV color and converting it to RGB
+    let c = HSVtoRGB(Math.random(), 1.0, 1.0);
+    c.r *= 0.15;
+    c.g *= 0.15;
+    c.b *= 0.15;
+
+    // Defining predefined color options
+    const colors = {
+        red: { r: 1.0 * 0.15, g: 0.0 * 0.15, b: 0.0 * 0.15 },
+        green: { r: 0.0 * 0.15, g: 1.0 * 0.15, b: 0.0 * 0.15 },
+        blue: { r: 0.0 * 0.15, g: 0.0 * 0.15, b: 1.0 * 0.15 }
+    };
+
+    // Randomly choosing one of the predefined colors
+    const randomKey = Object.keys(colors)[Math.floor(Math.random() * 3)];
+    const randomColor = colors[randomKey];
+
+    // Returning the selected color
+    return randomColor;
+}
+
+/**
+ * The `HSVtoRGB` function is converting HSV color values to RGB format.
+ * It is returning the resulting color as an object.
+ */
+function HSVtoRGB(h, s, v) {
+    let r, g, b, i, f, p, q, t;
+
+    // Calculating intermediate values for the conversion
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+
+    // Determining the final RGB values based on the sector of the HSV space
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+
+    // Returning the RGB color as an object
+    return { r, g, b };
+}
+
+/**
+ * The `normalizeColor` function is converting RGB color values from 0-255 to 0-1 range.
+ * It is returning the normalized color object.
+ */
+function normalizeColor(input) {
+    // Dividing each RGB channel value by 255
+    let output = {
+        r: input.r / 255,
+        g: input.g / 255,
+        b: input.b / 255
+    };
+
+    // Returning the normalized color
+    return output;
+}
+
+/**
+ * The `wrap` function is ensuring that a value wraps around a given range.
+ * It is calculating and returning the wrapped value.
+ */
+function wrap(value, min, max) {
+    // Calculating the range and ensuring wrapping
+    let range = max - min;
+    if (range == 0) return min;
+    return (value - min) % range + min;
+}
+
+/**
+ * The `getResolution` function is calculating the appropriate canvas resolution.
+ * It is taking aspect ratio into account and returning the width and height.
+ */
+function getResolution(resolution) {
+    // Calculating aspect ratio
+    let aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
+    if (aspectRatio < 1)
+        aspectRatio = 1.0 / aspectRatio;
+
+    // Determining minimum and maximum resolutions
+    let min = Math.round(resolution);
+    let max = Math.round(resolution * aspectRatio);
+
+    // Returning the resolution as an object
+    if (gl.drawingBufferWidth > gl.drawingBufferHeight)
+        return { width: max, height: min };
+    else
+        return { width: min, height: max };
+}
+
+/**
+ * The `getTextureScale` function is calculating the scaling factors for a texture.
+ * It is comparing the texture dimensions to the target dimensions and returning the scale.
+ */
+function getTextureScale(texture, width, height) {
+    // Calculating the scaling factors for X and Y dimensions
+    return {
+        x: width / texture.width,
+        y: height / texture.height
+    };
+}
+
+/**
+ * The `scaleByPixelRatio` function is scaling an input value by the device's pixel ratio.
+ * It is returning the scaled value as an integer.
+ */
+function scaleByPixelRatio(input) {
+    // Retrieving the device pixel ratio
+    let pixelRatio = window.devicePixelRatio || 1;
+
+    // Scaling the input value and returning the result
+    return Math.floor(input * pixelRatio);
+}
+
+/**
+ * The `hashCode` function is generating a hash code for a given string.
+ * It is using a bitwise algorithm to compute and return a 32-bit integer hash.
+ */
+function hashCode(s) {
+    if (s.length == 0) return 0; // Returning zero for empty strings
+
+    let hash = 0;
+
+    // Iterating through each character and calculating the hash
+    for (let i = 0; i < s.length; i++) {
+        hash = (hash << 5) - hash + s.charCodeAt(i);
+        hash |= 0; // Converting to a 32-bit integer
+    }
+
+    // Returning the computed hash
+    return hash;
+}
+
