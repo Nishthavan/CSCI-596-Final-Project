@@ -1,5 +1,8 @@
 <h1 align="center">🚀🚀 CSCI 596 Project (Fall '24) <br> Real-Time Fluid Simulation Using Navier-Stokes Algorithm</h1>
 
+<p align="center">
+  <img src="assets/demo.gif" alt="Real-Time Fluid Simulation Demo" width="600">
+</p>
 
 ## 📋📋 Introduction and Objective
 - The project focuses on the development of a real-time fluid dynamics simulation using the Navier-Stokes equations. By implementing this algorithm, we aim to accurately simulate the intricate flow patterns of liquids and gases in real-time, offering a powerful tool for applications ranging from gaming and animation to scientific visualization and engineering analysis.
