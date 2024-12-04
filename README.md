@@ -1,7 +1,8 @@
 # 🚀🚀 CSCI 596 Project(Fall 24): Real-Time Fluid Simulation using Navier-Stokes Algorithm
 
 ## 📋📋 Introduction and Objective
-The project implements a real-time fluid dynamics algorithm based on the Navier-Stokes equations, which describe the motion of fluid substances. This algorithm is also known as the "stable fluids" method. We have used WebGL for this project. This is part of the final project for the course CSCI 596 for Fall 24. 
+- The project focuses on the development of a real-time fluid dynamics simulation using the Navier-Stokes equations. By implementing this algorithm, we aim to accurately simulate the intricate flow patterns of liquids and gases in real time, offering a powerful tool for applications ranging from gaming and animation to scientific visualization and engineering analysis.
+- We have implemented the algorithm in Javascript using WebGL library.
 
 ## ⚙️⚙️ Key Components of Navier-Stokes Algorithm
 - **Advection**: This step moves fluid properties (such as velocity and dye) along the velocity field. It simulates how particles in the fluid would be carried by the current flow.
@@ -12,9 +13,9 @@ The project implements a real-time fluid dynamics algorithm based on the Navier-
 
 ## 🎮🌦️ Applications
 - The algorithm balances physical accuracy and computational efficiency without requiring extremely fine grids or tiny time steps.
-- Entertainment/Games: It is suitable for real-time applications like games to produce visually convincing fluid-like effects, such as swirling smoke or flowing water.
-- Healthcare: It can be used for blood flow analysis and drug delivery simulation in healthcare animations.
-- Weather: It can be used in climate modeling and weather forecasting animations.
+- **Entertainment/Games**: It is suitable for real-time applications like games to produce visually convincing fluid-like effects, such as swirling smoke or flowing water.
+- **Healthcare**: It can be used for blood flow analysis and drug delivery simulation in healthcare animations.
+- **Weather**: It can be used in climate modeling and weather forecasting animations.
 
 ## 🎬🎬 Demo
 You can experience the live demo here.
