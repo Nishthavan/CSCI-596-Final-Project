@@ -1,4 +1,5 @@
-# 🚀🚀 CSCI 596 Project(Fall 24): Real-Time Fluid Simulation using Navier-Stokes Algorithm
+<h1 align="center">🚀🚀 CSCI 596 Project (Fall '24) <br> Real-Time Fluid Simulation Using Navier-Stokes Algorithm</h1>
+
 
 ## 📋📋 Introduction and Objective
 - The project focuses on the development of a real-time fluid dynamics simulation using the Navier-Stokes equations. By implementing this algorithm, we aim to accurately simulate the intricate flow patterns of liquids and gases in real-time, offering a powerful tool for applications ranging from gaming and animation to scientific visualization and engineering analysis.
@@ -18,7 +19,7 @@
 - **Weather**: It can be used in climate modeling and weather forecasting animations.
 
 ## 🎬🎬 Demo
-You can experience the live demo here.
+You can experience the live demo [here](https://nishthavan.github.io/CSCI-596-Final-Project/)
 
 ## 👩‍💻👨‍💻 Group Members
 - Parth Rohilla
