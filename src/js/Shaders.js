@@ -81,3 +81,96 @@ function appendKeywords(sourceText, keywordArray) {
     const keywordDefs = keywordArray.map(keyword => `#define ${keyword}\n`).join('');
     return keywordDefs + sourceText;
 }
+
+
+// Creating Shaders....
+const baseVertexShader = createShader(gl.VERTEX_SHADER, `
+    precision highp float;
+
+    attribute vec2 aPosition;
+    varying vec2 vUv;
+    varying vec2 vL;
+    varying vec2 vR;
+    varying vec2 vT;
+    varying vec2 vB;
+    uniform vec2 texelSize;
+
+    void main () {
+        vUv = aPosition * 0.5 + 0.5;
+        vL = vUv - vec2(texelSize.x, 0.0);
+        vR = vUv + vec2(texelSize.x, 0.0);
+        vT = vUv + vec2(0.0, texelSize.y);
+        vB = vUv - vec2(0.0, texelSize.y);
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+    }
+`);
+
+const blurVertexShader = createShader(gl.VERTEX_SHADER, `
+    precision highp float;
+
+    attribute vec2 aPosition;
+    varying vec2 vUv;
+    varying vec2 vL;
+    varying vec2 vR;
+    uniform vec2 texelSize;
+
+    void main () {
+        vUv = aPosition * 0.5 + 0.5;
+        float offset = 1.33333333;
+        vL = vUv - texelSize * offset;
+        vR = vUv + texelSize * offset;
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+    }
+`);
+
+const blurShader = createShader(gl.FRAGMENT_SHADER, `
+    precision mediump float;
+    precision mediump sampler2D;
+
+    varying vec2 vUv;
+    varying vec2 vL;
+    varying vec2 vR;
+    uniform sampler2D uTexture;
+
+    void main () {
+        vec4 sum = texture2D(uTexture, vUv) * 0.29411764;
+        sum += texture2D(uTexture, vL) * 0.35294117;
+        sum += texture2D(uTexture, vR) * 0.35294117;
+        gl_FragColor = sum;
+    }
+`);
+
+const copyShader = createShader(gl.FRAGMENT_SHADER, `
+    precision mediump float;
+    precision mediump sampler2D;
+
+    varying highp vec2 vUv;
+    uniform sampler2D uTexture;
+
+    void main () {
+        gl_FragColor = texture2D(uTexture, vUv);
+    }
+`);
+
+const clearShader = createeShader(gl.FRAGMENT_SHADER, `
+    precision mediump float;
+    precision mediump sampler2D;
+
+    varying highp vec2 vUv;
+    uniform sampler2D uTexture;
+    uniform float value;
+
+    void main () {
+        gl_FragColor = value * texture2D(uTexture, vUv);
+    }
+`);
+
+const colorShader = createShader(gl.FRAGMENT_SHADER, `
+    precision mediump float;
+
+    uniform vec4 color;
+
+    void main () {
+        gl_FragColor = color;
+    }
+`);
