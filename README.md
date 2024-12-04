@@ -1,8 +1,8 @@
 # 🚀🚀 CSCI 596 Project(Fall 24): Real-Time Fluid Simulation using Navier-Stokes Algorithm
 
 ## 📋📋 Introduction and Objective
-- The project focuses on the development of a real-time fluid dynamics simulation using the Navier-Stokes equations. By implementing this algorithm, we aim to accurately simulate the intricate flow patterns of liquids and gases in real time, offering a powerful tool for applications ranging from gaming and animation to scientific visualization and engineering analysis.
-- We have implemented the algorithm in Javascript using WebGL library.
+- The project focuses on the development of a real-time fluid dynamics simulation using the Navier-Stokes equations. By implementing this algorithm, we aim to accurately simulate the intricate flow patterns of liquids and gases in real-time, offering a powerful tool for applications ranging from gaming and animation to scientific visualization and engineering analysis.
+- We have implemented the algorithm in Javascript using the WebGL library.
 
 ## ⚙️⚙️ Key Components of Navier-Stokes Algorithm
 - **Advection**: This step moves fluid properties (such as velocity and dye) along the velocity field. It simulates how particles in the fluid would be carried by the current flow.
