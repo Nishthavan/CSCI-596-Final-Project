@@ -272,3 +272,36 @@ function update () {
     render(null);
     requestAnimationFrame(update);
 }
+
+
+function calcDeltaTime () {
+    let now = Date.now();
+    let dt = (now - lastUpdateTime) / 1000;
+    dt = Math.min(dt, 0.016666);
+    lastUpdateTime = now;
+    return dt;
+}
+
+function updateColors (dt) {
+    if (!config.COLORFUL) return;
+
+    colorUpdateTimer += dt * config.COLOR_UPDATE_SPEED;
+    if (colorUpdateTimer >= 1) {
+        colorUpdateTimer = wrap(colorUpdateTimer, 0, 1);
+        pointers.forEach(p => {
+            p.color = generateColor();
+        });
+    }
+}
+
+function applyInputs () {
+    if (splatStack.length > 0)
+        multipleSplats(splatStack.pop());
+    // console.log("applying ...");
+    pointers.forEach(p => {
+        if (p.moved) {
+            p.moved = false;
+            splatPointer(p);
+        }
+    });
+}
