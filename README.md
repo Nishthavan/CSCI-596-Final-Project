@@ -1,7 +1,7 @@
 <h1 align="center">🚀🚀 CSCI 596 Project (Fall '24) <br> Real-Time Fluid Simulation Using Navier-Stokes Algorithm</h1>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Real-Time Fluid Simulation Demo" width="600">
+  <img src="asset/gify.gif" alt="Real-Time Fluid Simulation Demo" width="600">
 </p>
 
 ## 📋📋 Introduction and Objective
