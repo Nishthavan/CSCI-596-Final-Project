@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <title>Fluid Simulation</title>
+    <link rel="stylesheet" href="./src/styles/styles.css">
+    <script>
+        window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+        ga('create', 'UA-105392568-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <h1>Interactive Fluid Simulation</h1>
+            <p>Explore the beauty of physics-driven fluid animations in real time.</p>
+        </header>
+        <main>
+            <canvas id="simulationCanvas"></canvas>
+            <aside class="control-panel">
+                <h2>Controls</h2>
+                <label for="densityControl">Density Dissipation</label>
+                <input type="range" id="densityControl" min="0" max="4" step="0.1" value="1"
+                    onchange="changeDensityControl()">
+                <label for="velocityControl">Velocity Dissipation</label>
+                <input type="range" id="velocityControl" min="0" max="4" step="0.1" value="0.2"
+                    onchange="changeVelocityControl()">
+                <label for="pressureControl">Pressure</label>
+                <input type="range" id="pressureControl" min="0" max="1" step="0.05" value="0.8"
+                    onchange="changePressureControl()">
+                <label for="vorticityControl">Vorticity</label>
+                <input type="range" id="vorticityControl" min="0" max="50" step="0.05" value="30"
+                    onchange="changeVorticityControl()">
+                <label for="splatRadiusControl">Splat Radius</label>
+                <input type="range" id="splatRadiusControl" min="0" max="1" step="0.01" value="0.25"
+                    onchange="changeSplatRadiusControl()">
+                <button id="resetButton" onclick="resetValues()">Reset Simulation</button>
+            </aside>
+        </main>
+        <footer>
+            <p>Built with <span>&hearts;</span> using WebGL</p>
+        </footer>
+    </div>
+    <script src="./src/js/script.js"></script>
+</body>
+
+</html>
