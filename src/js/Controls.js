@@ -1,33 +1,49 @@
+// Controls.js
+// This file contains JavaScript functions and shaders used for controlling fluid simulation parameters.
+// Includes event listeners for UI elements and GLSL shader definitions for rendering fluid dynamics.
+
+// Handles changes to the density dissipation value through the UI.
+// Updates the simulation configuration and logs the new value.
 function changeDensityControl() { // change Density Dissipation Value
     const densityControl = document.getElementById("densityControl");
     console.log("Density Dissipation value:", densityControl.value);
     config.DENSITY_DISSIPATION = densityControl.value;
 }
 
+// Handles changes to the velocity dissipation value through the UI.
+// Updates the simulation configuration and logs the new value.
 function changeVelocityControl(){ // change Velocity Dissipation Value
     const velocityControl = document.getElementById("velocityControl");
     console.log("Velocity Dissipation value:", velocityControl.value);
     config.VELOCITY_DISSIPATION = velocityControl.value;
 }
 
+// Handles changes to the pressure value through the UI.
+// Updates the simulation configuration and logs the new value.
 function changePressureControl(){ // change Pressure Value
     const pressureControl = document.getElementById("pressureControl");
     console.log("Pressure value:", pressureControl.value);
     config.PRESSURE = pressureControl.value;
 }
 
+// Handles changes to the vorticity (CURL) value through the UI.
+// Updates the simulation configuration and logs the new value.
 function changeVorticityControl(){ // change CURL Value
     const vorticityControl = document.getElementById("vorticityControl");
     console.log("Vorticity value:", vorticityControl.value);
     config.CURL = vorticityControl.value;
 }
 
+// Handles changes to the splat radius value through the UI.
+// Updates the simulation configuration and logs the new value.
 function changeSplatRadiusControl(){
     const splatRadiusControl = document.getElementById("splatRadiusControl");
     console.log("Splat Radius value:", splatRadiusControl.value);
     config.SPLAT_RADIUS = splatRadiusControl.value;
 }
 
+// Resets all control values to their default settings.
+// Updates the DOM elements and simulation configuration accordingly.
 function resetValues(){
     document.getElementById("densityControl").value = 1;
     document.getElementById("velocityControl").value = 0.2;
@@ -43,7 +59,8 @@ function resetValues(){
 
 
 // Some of the Shaders:
-
+// GLSL Fragment Shader: Implements sunray rendering effect.
+// Utilizes iterative calculations to simulate the scattering and decay of light rays.
 const sunraysShader = compileShader(gl.FRAGMENT_SHADER, `
     precision highp float;
     precision highp sampler2D;
@@ -79,6 +96,8 @@ const sunraysShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
+// GLSL Fragment Shader: Handles the splat effect for fluid simulation.
+// Calculates the impact of color, point, and radius to modify the fluid texture.
 const splatShader = compileShader(gl.FRAGMENT_SHADER, `
     precision highp float;
     precision highp sampler2D;
@@ -99,6 +118,8 @@ const splatShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
+// GLSL Fragment Shader: Simulates the advection step in fluid dynamics.
+// Moves properties like velocity and dye along with the flow of the fluid.
 const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
     precision highp float;
     precision highp sampler2D;
@@ -139,6 +160,8 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
     ext.supportLinearFiltering ? null : ['MANUAL_FILTERING']
 );
 
+// GLSL Fragment Shader: Calculates the divergence of the velocity field.
+// Used to enforce incompressibility in fluid simulation.
 const divergenceShader = compileShader(gl.FRAGMENT_SHADER, `
     precision mediump float;
     precision mediump sampler2D;
@@ -167,6 +190,8 @@ const divergenceShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
+// GLSL Fragment Shader: Calculates the curl (vorticity) of the velocity field.
+// Helps generate rotational motion in the fluid simulation.
 const curlShader = compileShader(gl.FRAGMENT_SHADER, `
     precision mediump float;
     precision mediump sampler2D;
@@ -188,6 +213,8 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
+// GLSL Fragment Shader: Applies the vorticity confinement force to enhance fluid turbulence.
+// Adds swirling effects by amplifying vorticity values.
 const vorticityShader = compileShader(gl.FRAGMENT_SHADER, `
     precision highp float;
     precision highp sampler2D;
@@ -221,6 +248,8 @@ const vorticityShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
+// GLSL Fragment Shader: Solves the pressure equation to project the velocity field.
+// Ensures the fluid motion adheres to incompressibility constraints.
 const pressureShader = compileShader(gl.FRAGMENT_SHADER, `
     precision mediump float;
     precision mediump sampler2D;
@@ -245,6 +274,8 @@ const pressureShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
+// GLSL Fragment Shader: Subtracts the pressure gradient from the velocity field.
+// Finalizes the velocity field for rendering.
 const gradientSubtractShader = compileShader(gl.FRAGMENT_SHADER, `
     precision mediump float;
     precision mediump sampler2D;
